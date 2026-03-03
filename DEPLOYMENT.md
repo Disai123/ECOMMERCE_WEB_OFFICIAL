@@ -35,7 +35,7 @@ git push origin main
 |---------|-------|
 | **Environment** | `Node` |
 | **Build Command** | `npm install && npx prisma generate && npm run build` |
-| **Start Command** | `node .next/standalone/server.js` |
+| **Start Command** | `npm start` |
 | **Node Version** | `18` or higher |
 
 ---
