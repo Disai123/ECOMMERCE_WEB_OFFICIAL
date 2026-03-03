@@ -1,14 +1,14 @@
 'use client'
 
 import { useState } from 'react'
-import { signIn, getSession } from 'next-auth/react'
+import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { ArrowLeft, Eye, EyeOff } from 'lucide-react'
+import { ArrowLeft, Eye, EyeOff, LogIn } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 export default function LoginPage() {
@@ -29,7 +29,7 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!formData.email || !formData.password) {
       toast.error('Please fill in all fields')
       return
@@ -45,9 +45,10 @@ export default function LoginPage() {
       })
 
       if (result?.error) {
-        toast.error('Invalid email or password')
+        toast.error('Invalid email or password. Please try again.')
       } else {
-        toast.success('Login successful!')
+        toast.success('Login successful! Welcome back 👋')
+        router.refresh()   // ← updates the navbar/session immediately
         router.push('/')
       }
     } catch (error) {
@@ -55,6 +56,15 @@ export default function LoginPage() {
       toast.error('An error occurred during login')
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  // Quick-fill demo credentials
+  const fillDemo = (type: 'admin' | 'customer') => {
+    if (type === 'admin') {
+      setFormData({ email: 'admin@aishani.com', password: 'admin123' })
+    } else {
+      setFormData({ email: 'customer@aishani.com', password: 'customer123' })
     }
   }
 
@@ -74,12 +84,15 @@ export default function LoginPage() {
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="text-3xl font-bold text-primary">Unicart</div>
-          <p className="text-gray-600">Sign in to your account</p>
+          <p className="text-gray-600 mt-1">Sign in to your account</p>
         </div>
 
         <Card>
           <CardHeader>
-            <CardTitle>Sign In</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <LogIn className="h-5 w-5" />
+              Sign In
+            </CardTitle>
             <CardDescription>
               Enter your email and password to access your account
             </CardDescription>
@@ -95,7 +108,8 @@ export default function LoginPage() {
                   value={formData.email}
                   onChange={handleInputChange}
                   required
-                  placeholder="Enter your email"
+                  placeholder="you@example.com"
+                  autoComplete="email"
                 />
               </div>
 
@@ -110,6 +124,7 @@ export default function LoginPage() {
                     onChange={handleInputChange}
                     required
                     placeholder="Enter your password"
+                    autoComplete="current-password"
                   />
                   <Button
                     type="button"
@@ -127,26 +142,6 @@ export default function LoginPage() {
                 </div>
               </div>
 
-              <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <input
-                    id="remember-me"
-                    name="remember-me"
-                    type="checkbox"
-                    className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
-                  />
-                  <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
-                    Remember me
-                  </label>
-                </div>
-
-                <div className="text-sm">
-                  <a href="#" className="font-medium text-primary hover:text-primary/80">
-                    Forgot your password?
-                  </a>
-                </div>
-              </div>
-
               <Button
                 type="submit"
                 className="w-full"
@@ -156,29 +151,9 @@ export default function LoginPage() {
               </Button>
             </form>
 
-            <div className="mt-6">
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-gray-300" />
-                </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-white text-gray-500">Or continue with</span>
-                </div>
-              </div>
-
-              <div className="mt-6 grid grid-cols-2 gap-3">
-                <Button variant="outline" className="w-full">
-                  Google
-                </Button>
-                <Button variant="outline" className="w-full">
-                  Facebook
-                </Button>
-              </div>
-            </div>
-
             <div className="mt-6 text-center">
               <p className="text-sm text-gray-600">
-                Don't have an account?{' '}
+                Don&apos;t have an account?{' '}
                 <Link href="/register" className="font-medium text-primary hover:text-primary/80">
                   Sign up here
                 </Link>
@@ -187,15 +162,35 @@ export default function LoginPage() {
           </CardContent>
         </Card>
 
-        {/* Demo Credentials */}
-        <Card className="mt-6">
-          <CardContent className="pt-6">
-            <div className="text-center">
-              <h3 className="text-sm font-medium text-gray-900 mb-2">Demo Credentials</h3>
-              <div className="text-xs text-gray-600 space-y-1">
-                <p><strong>Admin:</strong> admin@aishani.com / admin123</p>
-                <p><strong>Customer:</strong> customer@aishani.com / customer123</p>
-              </div>
+        {/* Demo Credentials Card */}
+        <Card className="mt-4">
+          <CardHeader className="pb-2 pt-4">
+            <CardTitle className="text-sm text-gray-700">🔑 Demo Credentials (click to fill)</CardTitle>
+          </CardHeader>
+          <CardContent className="pb-4">
+            <div className="grid grid-cols-2 gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-xs"
+                onClick={() => fillDemo('admin')}
+                type="button"
+              >
+                Admin Login
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-xs"
+                onClick={() => fillDemo('customer')}
+                type="button"
+              >
+                Customer Login
+              </Button>
+            </div>
+            <div className="text-xs text-gray-500 mt-2 space-y-1">
+              <p><strong>Admin:</strong> admin@aishani.com / admin123</p>
+              <p><strong>Customer:</strong> customer@aishani.com / customer123</p>
             </div>
           </CardContent>
         </Card>
